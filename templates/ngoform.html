@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Meal-Link | NGO Claim Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --muted: #64748b;
+      --radius: 14px;
+      --shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Inter", sans-serif; margin: 0; background: var(--bg); color: #0f172a; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--green-dark); }
+    nav a { margin: 0 12px; text-decoration: none; color: #334155; font-weight: 500; }
+    .btn { background: var(--green); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: var(--green-dark); }
+    main { padding: 40px; max-width: 1200px; margin: auto; }
+    h2 { font-size: 22px; color: var(--green-dark); margin-bottom: 10px; }
+    p.subtext { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+    .stat-card div:first-child { font-size: 13px; color: var(--muted); }
+    .stat-card div:last-child { font-size: 22px; font-weight: 700; color: var(--green-dark); }
+
+    .filters { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 24px; }
+    .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 12px; }
+    label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.2s; }
+    input:focus, select:focus { border-color: var(--green); }
+
+    .filter-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .filter-actions button { padding: 8px 16px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; font-weight: 500; transition: background 0.2s; }
+    .filter-actions button:hover { background: #f1f5f9; }
+    .filter-actions .apply { background: var(--green); color: #fff; border: none; }
+    .filter-actions .apply:hover { background: var(--green-dark); }
+
+    .list { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; }
+    .batch { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; transition: box-shadow 0.2s; }
+    .batch:hover { box-shadow: 0 8px 20px rgba(16,24,40,0.12); }
+    .batch-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .batch h3 { font-size: 16px; color: var(--green-dark); margin: 0; }
+    .urgent { background: #fee2e2; color: #b91c1c; font-weight: 600; font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+    .batch-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: #f1f5f9; color: #475569; }
+    .tag.veg { background: #dcfce7; color: #166534; }
+    .tag.nonveg { background: #fee2e2; color: #b91c1c; }
+    .tag.mixed { background: #fef9c3; color: #854d0e; }
+    .food-img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; margin-top: 12px; }
+    .claim-section { margin-top: 14px; display: flex; gap: 8px; align-items: center; }
+    .claim-section input { width: 100px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+    .claim-btn { flex-grow: 1; padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: background 0.2s; background: var(--green); color: #fff; }
+    .claim-btn:hover { background: var(--green-dark); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🍴 Meal-Link</h1>
+  <nav>
+    <a href="{{ url_for('home') }}">Home</a>
+    <a href="{{ url_for('claim_or_donate') }}">Claim/Donate</a>
+    <a href="{{ url_for('feedback') }}">Feedback</a>
+    <a href="{{ url_for('help') }}">Help</a>
+    <a href="{{ url_for('logout') }}" style="padding:6px 14px; background: var(--green); color: white; border-radius: 10px;">Logout</a>
+  </nav>
+</header>
+<main>
+  <h2>Available Meal Batches</h2>
+  <p class="subtext">Claim available food batches from partnered restaurants before they expire.</p>
+
+  <div class="stats">
+    <div class="stat-card"><div>Available Batches</div><div id="statTotal">0</div></div>
+    <div class="stat-card"><div>Total Portions</div><div id="statPortions">0</div></div>
+    <div class="stat-card"><div>Expiring Soon</div><div id="statUrgent" style="color:#dc2626">0</div></div>
+    <div class="stat-card"><div>My Claims Today</div><div id="statClaimed" style="color:#2563eb">0</div></div>
+  </div>
+
+  <div class="filters">
+    <div class="filters-grid">
+      <div>
+        <label>Search</label>
+        <input type="text" id="searchText" placeholder="Restaurant or Meal Title...">
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="typeFilter">
+          <option value="">All</option>
+          <option value="veg">Veg</option>
+          <option value="nonveg">Non-Veg</option>
+          <option value="mixed">Mixed</option>
+        </select>
+      </div>
+      <div>
+        <label>Sort By</label>
+        <select id="sortBy">
+          <option value="expiry_asc">Nearest expiry</option>
+          <option value="expiry_desc">Farthest expiry</option>
+          <option value="quantity_desc">Largest quantity</option>
+          <option value="quantity_asc">Smallest quantity</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button id="clearFilters">Clear</button>
+      <button id="applyFilters" class="apply">Apply</button>
+    </div>
+  </div>
+
+  <div class="list" id="batchesContainer">
+    <p>Loading donations...</p>
+  </div>
+</main>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const searchText = document.getElementById('searchText');
+  const typeFilter = document.getElementById('typeFilter');
+  const sortBy = document.getElementById('sortBy');
+  const applyFilters = document.getElementById('applyFilters');
+  const clearFilters = document.getElementById('clearFilters');
+  const container = document.getElementById('batchesContainer');
+
+  const statTotal = document.getElementById('statTotal');
+  const statPortions = document.getElementById('statPortions');
+  const statUrgent = document.getElementById('statUrgent');
+  const statClaimed = document.getElementById('statClaimed');
+
+  function renderDonations(data) {
+    container.innerHTML = "";
+    if (!data || data.length === 0) {
+      container.innerHTML = `<p>No available donations found.</p>`;
+      statTotal.textContent = 0;
+      statPortions.textContent = 0;
+      statUrgent.textContent = 0;
+      return;
+    }
+
+    let totalBatches = data.length;
+    let totalPortions = 0;
+    let urgentCount = 0;
+
+    const now = new Date();
+
+    data.forEach(d => {
+      totalPortions += d.quantity;
+      const expiry = new Date(d.expiry_time);
+      if ((expiry - now)/3600000 <= 2) urgentCount++; // expiring within 2 hours
+
+      const card = document.createElement("div");
+      card.className = "batch";
+      card.innerHTML = `
+        <div class="batch-header"><h3>${d.restaurant_name}</h3></div>
+        <div class="batch-meta">${d.restaurant_location}</div>
+        <p style="font-weight:600; color:#0f172a;">🍱 ${d.meal_title}</p>
+        <div class="tags">
+          <span class="tag ${d.food_type.toLowerCase()}">${d.food_type.toUpperCase()}</span>
+          <span class="tag">${d.quantity} portions</span>
+          <span class="tag">${new Date(d.expiry_time).toLocaleString()}</span>
+        </div>
+        <form method="POST" action="/claim/${d.donation_id}">
+          <div class="claim-section">
+            <input type="number" name="claim_qty" min="1" max="${d.quantity}" placeholder="Qty" required>
+            <button type="submit" class="claim-btn">Claim Now</button>
+          </div>
+        </form>
+      `;
+      container.appendChild(card);
+    });
+
+    // Update stats dynamically
+    statTotal.textContent = totalBatches;
+    statPortions.textContent = totalPortions;
+    statUrgent.textContent = urgentCount;
+    statClaimed.textContent = data.claimed_today || 0; // assuming API sends this
+  }
+
+  function loadList() {
+    const params = new URLSearchParams({
+      search: searchText.value.trim(),
+      type: typeFilter.value,
+      sortBy: sortBy.value
+    });
+    fetch('/api/donations?' + params.toString())
+      .then(res => res.json())
+      .then(renderDonations)
+      .catch(err => {
+        console.error('Error loading donations', err);
+        container.innerHTML = `<p>Error loading donations. Please try again later.</p>`;
+      });
+  }
+
+  applyFilters.addEventListener('click', loadList);
+  clearFilters.addEventListener('click', () => {
+    searchText.value = '';
+    typeFilter.value = '';
+    sortBy.value = 'expiry_asc';
+    loadList();
+  });
+
+  // Load donations immediately on page load
+  loadList();
+});
+</script>
+<script>
+const flashed = {{ get_flashed_messages(category_filter=["success"]) | tojson | safe }};
+if (Array.isArray(flashed) && flashed.length > 0) {
+  alert(flashed[0]);
+}
+</script>
+
+</body>
+</html>

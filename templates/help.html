@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meal-Link | Help & FAQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --muted: #64748b;
+      --radius: 14px;
+      --shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: #0f172a;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+
+    nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #334155;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--green-dark);
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--green-dark);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 40px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #0f172a;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    ul {
+      color: var(--muted);
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🍴 Meal-Link</h1>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('claim_or_donate') }}">Claim/Donate</a>
+      <a href="{{ url_for('feedback') }}">Feedback</a>
+      <a href="{{ url_for('help') }}">Help</a>
+      <a href="{{ url_for('signin') }}">Sign Up</a>
+      <!-- <button class="btn-primary">Logout</button> -->
+    </nav>
+  </header>
+
+  <main>
+    <!-- How It Works -->
+    <div class="card">
+      <h2>How Donations Work</h2>
+      <p>
+        Meal-Link connects restaurants, NGOs, and volunteers to reduce food waste and feed those in need.  
+        The process is simple:
+      </p>
+      <ul>
+        <li><b>Step 1:</b> Restaurants post surplus food using the donation form.</li>
+        <li><b>Step 2:</b> NGOs or volunteers browse available meals and claim them.</li>
+        <li><b>Step 3:</b> Pickups are coordinated, ensuring safe and timely delivery.</li>
+      </ul>
+      <p>All donations are time-bound to ensure freshness and food safety.</p>
+    </div>
+
+    <!-- Safety Guidelines -->
+    <div class="card">
+      <h2>Safety & Hygiene Guidelines</h2>
+      <ul>
+        <li>Ensure food is stored at safe temperatures until pickup.</li>
+        <li>Use clean, sealed containers for packaging meals.</li>
+        <li>Avoid donating perishable food older than 4 hours (without refrigeration).</li>
+        <li>Clearly label vegetarian/non-vegetarian items.</li>
+        <li>Follow your local food safety authority’s hygiene regulations.</li>
+      </ul>
+      <p>Maintaining hygiene protects both donors and recipients — thank you for caring! 💚</p>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="card" style="grid-column: 1 / -1;">
+      <h2>Contact Support</h2>
+      <p>Need help or have queries? You can reach out through the details below.</p>
+      <ul>
+        <li><b>Email:</b> support@meal-link.org</li>
+        <li><b>Phone:</b> +91 98765 43210</li>
+        <li><b>Office Hours:</b> Mon–Fri, 9:00 AM – 6:00 PM</li>
+        <li><b>Address:</b> 21B, Community Center, Netaji Subhas University of Technology, Delhi</li>
+      </ul>
+      <p>Our support team is here to ensure your donation process goes smoothly.</p>
+    </div>
+  </main>
+</body>
+</html>

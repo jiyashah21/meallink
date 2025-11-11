@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meal-Link | Restaurant Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --muted: #64748b;
+      --radius: 14px;
+      --shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Inter", sans-serif; background: var(--bg); color: #0f172a; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--green-dark); }
+    nav a { margin: 0 12px; text-decoration: none; color: #334155; font-weight: 500; }
+    .dashboard { display: grid; grid-template-columns: 1fr 1fr 0.8fr; gap: 24px; padding: 40px; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+    h2 { font-size: 18px; margin-bottom: 16px; }
+    label { font-weight: 600; display: block; margin-bottom: 6px; font-size: 14px; }
+    input, select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 14px; margin-bottom: 16px; outline: none; transition: border 0.2s; }
+    input:focus, select:focus { border-color: var(--green); }
+    .btn-primary { background: var(--green); color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--green-dark); }
+    .btn-secondary { background: #e2e8f0; color: #0f172a; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 500; cursor: pointer; margin-left: 10px; }
+    .donation-list { max-height: 400px; overflow-y: auto; }
+    .donation-item { background: #f9fafb; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .donation-item h4 { margin: 0; font-size: 15px; }
+    .status { font-size: 13px; color: var(--muted); }
+    .status-badge { background: #e0f7ec; color: var(--green-dark); font-size: 12px; padding: 4px 8px; border-radius: 8px; margin-left: 8px; }
+    .edit-btn { background: #e2e8f0; border: none; border-radius: 8px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+    .summary-box { background: #f9fafb; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .summary-box h3 { margin: 0; color: var(--green-dark); font-size: 20px; }
+    .summary-box p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; padding: 20px; } }
+
+    #editModal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+    }
+    .modal-content {
+      background: #fff; border-radius: 14px; padding: 20px; width: 400px;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🍴 Meal-Link</h1>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('claim_or_donate') }}">Claim/Donate</a>
+      <a href="{{ url_for('feedback') }}">Feedback</a>
+      <a href="{{ url_for('help') }}">Help</a>
+      <a href="{{ url_for('logout') }}" style="padding:6px 14px; background: var(--green); color: white; border-radius: 10px;">Logout</a>
+    </nav>
+  </header>
+
+  <main class="dashboard">
+    <!-- Donation Form -->
+    <div class="card">
+      <h2>Restaurant Dashboard</h2>
+      <p style="color: var(--muted); margin-top:-8px;">Post donations & track status</p>
+      <form action="{{ url_for('add_donation') }}" method="POST" enctype="multipart/form-data">
+        <label>Meal Title</label>
+        <input type="text" name="meal_title" placeholder="e.g., 30 Veg Thali Boxes" required>
+        <label>Food Type</label>
+        <select name="food_type" required>
+          <option value="veg">Vegetarian</option>
+          <option value="nonveg">Non-Vegetarian</option>
+          <option value="mixed">Mixed</option>
+        </select>
+        <label>Quantity (approx)</label>
+        <input type="number" name="quantity" min="1" placeholder="e.g., 15" required>
+        <label>Expiry Date & Time</label>
+        <input type="datetime-local" name="expiry_time" required>
+        <label>Pickup Location</label>
+        <input type="text" name="location" placeholder="Street, Area, City" required>
+        <label>Meal Photo</label>
+        <input type="file" name="image" accept="image/*" required>
+        <div style="margin-top:10px;">
+          <button type="submit" class="btn-primary">Post Donation</button>
+          <button type="reset" class="btn-secondary">Back</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Donation History -->
+    <div class="card">
+      <h2>Past & Active Donations</h2>
+      <div class="donation-list">
+        {% for donation in donations %}
+        <div class="donation-item">
+          <div>
+            <h4>{{ donation.meal_title }}
+              <span class="status-badge">{{ donation.status }}</span>
+            </h4>
+            <small style="color: var(--muted); font-size:12px;">
+              {{ donation.quantity }} • {{ donation.food_type }} • {{ donation.location }}
+            </small>              
+            <!-- <div class="status">
+              {% if donation.claimed_info %}
+              <br>
+              <small style="color: var(--muted); font-size:12px;">
+                Claimed by: {{ donation.claimed_info|replace(';', ', ') }}
+              </small>
+              {% endif %}
+            </div> -->
+          </div>
+          <div>
+            <button class="edit-btn"
+              onclick="openEditModal(
+                '{{ donation.donation_id }}',
+                '{{ donation.meal_title|escape }}',
+                '{{ donation.food_type|escape }}',
+                '{{ donation.quantity }}',
+                '{{ donation.expiry_time }}',
+                '{{ donation.location|escape }}'
+              )">
+              Edit
+            </button>
+
+            <form action="{{ url_for('toggle_status', donation_id=donation.donation_id) }}" method="post" style="display:inline;">
+              <button type="submit" class="edit-btn" style="background:#d1fae5;">
+                {% if donation.status == 'available' %}Mark Claimed{% else %}Mark Available{% endif %}
+              </button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <p style="color: var(--muted); font-size:14px;">No donations yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Status Summary -->
+    <div class="card">
+      <h2>Status Summary</h2>
+      <p style="color:var(--muted); margin-top:-10px;">Expired — Claimed — Completed</p>
+      <div class="summary-box">
+        <h3>{{ summary.available }}</h3><p>Available</p>
+      </div>
+      <div class="summary-box">
+        <h3>{{ summary.claimed }}</h3><p>Claimed</p>
+      </div>
+    </div>
+
+    <!-- Claims Overview -->
+  <div class="card" style="grid-column: 1 / -1;"> <!-- full width -->
+    <h2>Claims Overview</h2>
+    {% if claims_overview %}
+      <div class="donation-list">
+        {% for claim in claims_overview %}
+        <div class="donation-item" style="padding:8px 12px; font-size:13px; background:#f1f5f9;">
+          <strong>{{ claim.meal_title }}</strong> 
+          &mdash; {{ claim.quantity }} claimed by {{ claim.ngo_name }} on {{ claim.claimed_at }}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--muted); font-size:14px;">No claims yet.</p>
+    {% endif %}
+  </div>
+
+
+    
+  </main>
+
+  <!-- Edit Modal -->
+  <div id="editModal">
+    <div class="modal-content">
+      <h3>Edit Donation</h3>
+      <form id="editDonationForm" action="{{ url_for('edit_donation') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="donation_id" id="edit_id">
+        <label>Meal Title</label>
+        <input type="text" name="meal_title" id="edit_meal_title" required>
+        <label>Food Type</label>
+        <select name="food_type" id="edit_food_type" required>
+          <option value="veg">Vegetarian</option>
+          <option value="nonveg">Non-Vegetarian</option>
+          <option value="mixed">Mixed</option>
+        </select>
+        <label>Quantity</label>
+        <input type="number" name="quantity" id="edit_quantity" required>
+        <label>Expiry Date & Time</label>
+        <input type="datetime-local" name="expiry_time" id="edit_expiry" required>
+        <label>Pickup Location</label>
+        <input type="text" name="location" id="edit_location" required>
+        <label>Change Photo (optional)</label>
+        <input type="file" name="image" accept="image/*">
+        <div style="text-align:right;">
+          <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEditModal(id, title, type, qty, expiry, loc) {
+      document.getElementById("edit_id").value = id;
+      document.getElementById("edit_meal_title").value = title;
+      document.getElementById("edit_food_type").value = type;
+      document.getElementById("edit_quantity").value = qty;
+      if (expiry && expiry.includes(" ")) {
+        const parts = expiry.split(" ");
+        document.getElementById("edit_expiry").value = parts[0] + "T" + (parts[1] || "00:00");
+      } else {
+        document.getElementById("edit_expiry").value = expiry;
+      }
+      document.getElementById("edit_location").value = loc;
+      document.getElementById("editModal").style.display = "flex";
+    }
+    function closeEditModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+  </script>
+</body>
+</html>

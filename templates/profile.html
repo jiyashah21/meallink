@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meal-Link | Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #22c55e;
+      --green-dark: #16a34a;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --muted: #64748b;
+      --radius: 14px;
+      --shadow: 0 6px 18px rgba(16, 24, 40, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: #0f172a;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 40px; background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    header h1 { font-size: 20px; font-weight: 700; color: var(--green-dark); }
+    nav a {
+      margin: 0 12px; text-decoration: none; color: #334155;
+      font-weight: 500; transition: color 0.2s;
+    }
+    nav a:hover { color: var(--green-dark); }
+    .btn-primary {
+      background: var(--green); color: #fff; border: none;
+      padding: 8px 14px; border-radius: 10px;
+      font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--green-dark); }
+    main {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 24px; padding: 40px;
+    }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 24px;
+    }
+    h2 { font-size: 20px; margin-bottom: 16px; color: #0f172a; }
+    ul { color: var(--muted); padding-left: 20px; }
+    li { margin-bottom: 8px; }
+    footer { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🍴 Meal-Link</h1>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('claim_or_donate') }}">Claim/Donate</a>
+      <a href="{{ url_for('feedback') }}">Feedback</a>
+      <a href="{{ url_for('help') }}">Help</a>
+      <a href="{{ url_for('logout') }}" style="padding:6px 14px; background: var(--green); color: white; border-radius: 10px;">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>User Information</h2>
+      <ul id="userInfo"></ul>
+    </div>
+
+    <div class="card">
+      <h2>Account Summary</h2>
+      <ul id="accountSummary"></ul>
+    </div>
+  </main>
+
+  <script>
+  let user = {};
+  let summary = {};
+
+  try {
+    user = JSON.parse('{{ user | tojson | safe | replace("'", "\\'") }}');
+    summary = JSON.parse('{{ account_summary | tojson | safe | replace("'", "\\'") }}');
+  } catch (error) {
+    console.error("Error parsing user or summary JSON:", error);
+  }
+
+  const userInfo = document.getElementById('userInfo');
+  const accountSummary = document.getElementById('accountSummary');
+
+  if (!user || Object.keys(user).length === 0) {
+    window.location.href = "{{ url_for('signin') }}";
+  } else {
+    userInfo.innerHTML = `
+      <li><b>Name:</b> ${user.name || 'N/A'}</li>
+      <li><b>Email:</b> ${user.email || 'N/A'}</li>
+      <li><b>Phone:</b> ${user.phone || 'N/A'}</li>
+      <li><b>Location:</b> ${user.location || 'N/A'}</li>
+      <li><b>Role:</b> ${user.role === 'restaurant' ? 'Restaurant Partner' : 'NGO Partner'}</li>
+      <li><b>User ID:</b> ${user.user_id || 'N/A'}</li>
+      <li><b>Date Joined:</b> ${user.joined || 'N/A'}</li>
+    `;
+
+    if (user.role === 'restaurant' && summary) {
+      accountSummary.innerHTML = `
+        <li><b>Total Donations:</b> ${summary.total ?? 0}</li>
+        <li><b>Claimed Donations:</b> ${summary.claimed ?? 0}</li>
+        <li><b>Expired Donations:</b> ${summary.expired ?? 0}</li>
+      `;
+    } else if (user.role === 'ngo' && summary) {
+      accountSummary.innerHTML = `
+        <li><b>Total Claims:</b> ${summary.total ?? 0}</li>
+        <li><b>Delivered Claims:</b> ${summary.delivered ?? 0}</li>
+      `;
+    } else {
+      accountSummary.innerHTML = `<li>No summary data available.</li>`;
+    }
+  }
+</script>
+
+
+</body>
+</html>
+
