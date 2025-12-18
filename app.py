@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import threading
 import os
 from werkzeug.utils import secure_filename
-import requests
+# import requests
 from math import radians, sin, cos, sqrt, atan2
 
 app = Flask(__name__)
