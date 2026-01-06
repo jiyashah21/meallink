@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import threading
 import os
 from werkzeug.utils import secure_filename
+from flask_mail import Mail, Message
 # import requests
 from math import radians, sin, cos, sqrt, atan2
 
@@ -15,6 +16,18 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# ---------- EMAIL CONFIG ----------
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME='meallink25@gmail.com',
+    MAIL_PASSWORD='lquqmxxwyrjiwhec',
+    MAIL_DEFAULT_SENDER='meallink25@gmail.com'
+)
+
+mail = Mail(app)
 
 # ---------------------------
 # DATABASE CONNECTION SETUP
@@ -425,6 +438,42 @@ def claim_donation(donation_id):
 
 
     conn.commit()
+    # --------- EMAIL (ADDITIVE, NO LOGIC CHANGE) ---------
+    details = conn.execute('''
+        SELECT 
+            d.meal_title,
+            d.location AS restaurant_location,
+            u.name AS restaurant_name,
+            ngo.email AS ngo_email,
+            ngo.name AS ngo_name
+        FROM donations d
+        JOIN users u ON d.user_id = u.user_id
+        JOIN users ngo ON ngo.user_id = ?
+        WHERE d.donation_id = ?
+    ''', (session['user_id'], donation_id)).fetchone()
+
+    if details:
+        msg = Message(
+            subject="Meal-Link | Claim Confirmation",
+            recipients=[details['ngo_email']]
+        )
+        msg.body = f"""
+Hello {details['ngo_name']},
+
+Your food claim has been successfully registered.
+
+🍴 Restaurant: {details['restaurant_name']}
+📍 Location: {details['restaurant_location']}
+🍱 Food Item: {details['meal_title']}
+📦 Quantity Claimed: {claim_qty}
+
+Please coordinate pickup accordingly.
+
+– Meal-Link Team
+        """
+        mail.send(msg)
+    # ---------------------------------------------------
+
     conn.close()
 
     flash('Food claimed successfully!', 'success')
